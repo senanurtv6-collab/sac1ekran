@@ -7,143 +7,93 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
-        :root {
-            --bg: #0a1628; --primary: #4fc3f7; --danger: #ef5350;
-            --success: #27ae60; --warning: #f39c12; --text: #fff;
-            --card-bg: #ffffff; --dark-heading: #2c3e50; --muted: #90a4ae;
-            --border: rgba(255,255,255,0.1); --input-bg: rgba(255,255,255,0.08);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); min-height: 100vh; }
-
-        .login-page { width: 100%; height: 100vh; background: linear-gradient(135deg, #0a1628 0%, #1a2a4a 50%, #0a1628 100%); display: flex; justify-content: center; align-items: center; }
-        .login-container { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 20px; padding: 50px 40px; width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
-        .login-logo { text-align: center; margin-bottom: 30px; }
-        .login-logo h1 { color: var(--text); font-size: 32px; font-weight: 700; }
-        .login-logo h1 span { color: var(--primary); }
-        .login-logo p { color: var(--muted); font-size: 14px; margin-top: 5px; letter-spacing: 4px; text-transform: uppercase; }
-        .sync-badge { background: var(--primary); color: #0a1628; font-size: 10px; padding: 3px 10px; border-radius: 20px; display: inline-block; margin-top: 10px; font-weight: 600; }
-        .user-badge { background: rgba(79,195,247,0.15); border: 1px solid rgba(79,195,247,0.3); border-radius: 20px; padding: 6px 15px; color: var(--primary); font-size: 13px; margin-top: 15px; text-align: center; }
-        .login-form .form-group { margin-bottom: 20px; }
-        .login-form label { color: #b0bec5; font-size: 13px; font-weight: 500; display: block; margin-bottom: 6px; }
-        .login-form input { width: 100%; padding: 12px 15px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 15px; transition: all 0.3s; }
-        .login-form input:focus { outline: none; border-color: var(--primary); }
-        .login-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), #0288d1); border: none; border-radius: 10px; color: var(--text); font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; letter-spacing: 1px; text-transform: uppercase; }
-        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(79,195,247,0.4); }
-        .login-error { color: var(--danger); font-size: 13px; text-align: center; margin-top: 12px; display: none; }
-
-        .main-page { display: none; width: 100%; min-height: 100vh; background: #f5f7fb; padding: 20px; }
-        .container { max-width: 1400px; margin: 0 auto; background: var(--card-bg); padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        h1 { color: var(--dark-heading); margin-bottom: 20px; font-size: 26px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-        h2 { color: var(--dark-heading); margin-bottom: 15px; }
-        h3 { color: #2980b9; margin: 20px 0 10px; }
-
-        .header-buttons { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .btn { background: var(--success); color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 8px; font-size: 14px; font-weight: 500; transition: all 0.2s; }
-        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .btn:disabled { background: #95a5a6; cursor: not-allowed; transform: none; box-shadow: none; opacity: 0.6; }
-        .btn-secondary { background: #2980b9; }
-        .btn-danger { background: #e74c3c; }
-        .btn-warning { background: var(--warning); }
-        .btn-info { background: #00bcd4; color: white; }
-        .btn-purple { background: #8e44ad; color: white; }
-        .btn-sm { padding: 6px 12px; font-size: 12px; }
-        .btn-xs { padding: 4px 8px; font-size: 11px; }
-
-        .logout-btn { background: #e74c3c; color: white; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; }
-        .logout-btn:hover { background: #c0392b; }
-
-        .user-info { background: #e8f4f8; padding: 15px 20px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        .user-info span { font-weight: bold; color: var(--dark-heading); font-size: 15px; }
-        .admin-badge { background: #8e44ad; color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px; margin-left: 8px; }
-        .kullanici-badge { background: #e3f2fd; color: #1565c0; padding: 3px 10px; border-radius: 12px; font-size: 11px; margin-left: 8px; }
-
-        .sync-status { font-size: 12px; margin-left: 10px; }
-        .sync-status.online { color: #27ae60; }
-        .sync-status.offline { color: #e74c3c; }
-
-        .form-group { margin: 15px 0; }
-        label { font-weight: 600; display: block; margin-bottom: 5px; color: #333; font-size: 13px; }
-        select, input[type="text"], input[type="number"], input[type="date"], input[type="password"] { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; transition: border 0.2s; }
-        select:focus, input:focus { outline: none; border-color: #2980b9; }
-
-        .info-note { background: #fff3cd; border: 1px solid #ffe69c; padding: 15px; border-radius: 8px; margin: 15px 0; color: #856404; font-size: 14px; }
-        .admin-note { background: #e8f5e9; border: 1px solid #66bb6a; padding: 15px; border-radius: 8px; margin: 15px 0; color: #2e7d32; font-size: 14px; }
-        .user-note { background: #fff3cd; border: 1px solid #ff9800; padding: 15px; border-radius: 8px; margin: 15px 0; color: #e65100; font-size: 14px; }
-
-        table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 13px; }
-        th, td { border: 1px solid #e0e0e0; padding: 8px 10px; text-align: center; }
-        th { background-color: #2c3e50; color: white; position: sticky; top: 0; z-index: 10; font-size: 12px; font-weight: 600; }
-        th.sortable { cursor: pointer; user-select: none; }
-        th.sortable:hover { background-color: #34495e; }
-        th .sort-arrow { margin-left: 4px; font-size: 10px; }
-        tr:hover { background-color: #f8fafc; }
-        tr.kilitli { background-color: #fff8e1; }
-
-        .small-input { width: 70px; padding: 6px; text-align: center; border: 1px solid #ddd; border-radius: 4px; }
-        .plaka-input { width: 80px; background: #f0f0f0; padding: 6px; text-align: center; font-size: 12px; border: 1px solid #ddd; border-radius: 4px; }
-        .toplam-input { width: 90px; background: #e8f5e9; font-weight: bold; padding: 6px; text-align: center; font-size: 12px; border: 1px solid #ddd; border-radius: 4px; }
-        .checkbox-col { width: 40px; }
-        .gecmis-table-container { max-height: 600px; overflow-y: auto; border: 1px solid #e0e0e0; margin: 10px 0; border-radius: 8px; }
-
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; }
-        .modal-content { background: white; margin: 3% auto; padding: 25px; width: 95%; max-width: 900px; border-radius: 12px; position: relative; max-height: 90vh; overflow-y: auto; }
-        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 28px; cursor: pointer; color: #999; }
-        .close-modal:hover { color: #333; }
-
-        .pagination { display: flex; gap: 6px; justify-content: center; margin: 15px 0; flex-wrap: wrap; }
-        .pagination button { padding: 8px 14px; cursor: pointer; border: 1px solid #ddd; background: white; border-radius: 6px; font-size: 13px; }
-        .pagination button:hover:not(:disabled) { background: #f0f0f0; }
-        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .detay-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; align-items: center; }
-        .detay-label { font-weight: 600; color: #2c3e50; min-width: 140px; }
-        .detay-value { color: #333; flex: 1; text-align: right; }
-
-        .detay-edit-section { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid var(--primary); }
-        .edit-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .edit-table th { background: #2980b9; font-size: 11px; }
-        .edit-table td { padding: 6px; }
-        .kalem-ekle-btn { background: var(--success); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; margin-top: 10px; font-size: 14px; }
-        .kalem-sil-btn { background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-        .action-buttons { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
-
-        .filtre-satir { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 15px; background: #f8f9fa; padding: 15px; border-radius: 8px; }
-        .filtre-satir > div { flex: 1; min-width: 140px; }
-        .excel-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px; flex-wrap: wrap; background: #e3f2fd; padding: 12px 15px; border-radius: 8px; }
-        .select-info { font-size: 14px; color: #1565c0; font-weight: 500; }
-
-        .hidden { display: none !important; }
-        .success { color: green; font-weight: bold; }
-        .error { color: red; font-weight: bold; }
-
-        .stok-select { width: 150px; padding: 6px; border: 1px solid #4fc3f7; border-radius: 4px; font-size: 12px; }
-        .miktar-input { width: 70px; padding: 6px; text-align: center; border: 1px solid #4fc3f7; border-radius: 4px; }
-        .plaka-display { width: 70px; padding: 6px; text-align: center; background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; }
-        .toplam-display { width: 80px; padding: 6px; text-align: center; background: #e8f8e8; font-weight: bold; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; }
-        .edit-aciklama { width: 130px; padding: 6px; border: 1px solid #4fc3f7; border-radius: 4px; font-size: 11px; }
-        .stok-isim { font-size: 11px; color: #666; text-align: left; }
-        .kilitli-bilgi { background: #ffe0b2; border: 1px solid #ff9800; padding: 12px 18px; border-radius: 8px; margin: 10px 0; color: #e65100; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-
-        .stok-duzenle-section { background: #f8f9fa; padding: 25px; border-radius: 10px; margin: 20px 0; border: 2px solid #8e44ad; }
-        .stok-duzenle-section h3 { color: #8e44ad; margin-bottom: 20px; font-size: 20px; }
-        .stok-form-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; }
-        .stok-form-row > div { flex: 1; min-width: 150px; }
-        .stok-card { background: white; padding: 12px 15px; border-radius: 8px; margin: 8px 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; border-left: 4px solid #2980b9; }
-        .stok-arama { margin-bottom: 15px; }
-        .stok-arama input { padding: 10px; border: 2px solid #2980b9; border-radius: 6px; width: 100%; font-size: 14px; }
-
-        .ozet-container { background: linear-gradient(135deg, #1a237e 0%, #283593 100%); padding: 20px; border-radius: 12px; margin: 15px 0; display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-around; }
-        .ozet-item { text-align: center; background: rgba(255,255,255,0.1); padding: 15px 25px; border-radius: 10px; min-width: 150px; flex: 1; }
-        .ozet-label { color: #b0bec5; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
-        .ozet-deger { color: #fff; font-size: 28px; font-weight: 700; }
-
-        .ajanda-section { background: #f8f9fa; padding: 25px; border-radius: 10px; margin: 20px 0; border: 2px solid #8e44ad; }
-        .ajanda-section h3 { color: #8e44ad; margin-bottom: 20px; }
-        .ajanda-form-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 15px; }
-        .ajanda-form-row > div { flex: 1; min-width: 150px; }
-        .ajanda-not-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; }
-        .ajanda-table-container { max-height: 500px; overflow-y: auto; }
+        :root{--bg:#0a1628;--primary:#4fc3f7;--danger:#ef5350;--success:#27ae60;--warning:#f39c12;--text:#fff;--card-bg:#ffffff;--dark-heading:#2c3e50;--muted:#90a4ae;--border:rgba(255,255,255,0.1);--input-bg:rgba(255,255,255,0.08)}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);min-height:100vh}
+        .login-page{width:100%;height:100vh;background:linear-gradient(135deg,#0a1628 0%,#1a2a4a 50%,#0a1628 100%);display:flex;justify-content:center;align-items:center}
+        .login-container{background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:20px;padding:50px 40px;width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+        .login-logo{text-align:center;margin-bottom:30px}
+        .login-logo h1{color:var(--text);font-size:32px;font-weight:700}
+        .login-logo h1 span{color:var(--primary)}
+        .login-logo p{color:var(--muted);font-size:14px;margin-top:5px;letter-spacing:4px;text-transform:uppercase}
+        .sync-badge{background:var(--primary);color:#0a1628;font-size:10px;padding:3px 10px;border-radius:20px;display:inline-block;margin-top:10px;font-weight:600}
+        .user-badge{background:rgba(79,195,247,0.15);border:1px solid rgba(79,195,247,0.3);border-radius:20px;padding:6px 15px;color:var(--primary);font-size:13px;margin-top:15px;text-align:center}
+        .login-form .form-group{margin-bottom:20px}
+        .login-form label{color:#b0bec5;font-size:13px;font-weight:500;display:block;margin-bottom:6px}
+        .login-form input{width:100%;padding:12px 15px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:15px;transition:all 0.3s}
+        .login-form input:focus{outline:none;border-color:var(--primary)}
+        .login-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),#0288d1);border:none;border-radius:10px;color:var(--text);font-size:16px;font-weight:600;cursor:pointer;transition:all 0.3s;letter-spacing:1px;text-transform:uppercase}
+        .login-btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(79,195,247,0.4)}
+        .login-error{color:var(--danger);font-size:13px;text-align:center;margin-top:12px;display:none}
+        .main-page{display:none;width:100%;min-height:100vh;background:#f5f7fb;padding:20px}
+        .container{max-width:1400px;margin:0 auto;background:var(--card-bg);padding:30px;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
+        h1{color:var(--dark-heading);margin-bottom:20px;font-size:26px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+        h2{color:var(--dark-heading);margin-bottom:15px}h3{color:#2980b9;margin:20px 0 10px}
+        .header-buttons{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+        .btn{background:var(--success);color:white;border:none;padding:10px 20px;cursor:pointer;border-radius:8px;font-size:14px;font-weight:500;transition:all 0.2s}
+        .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+        .btn:disabled{background:#95a5a6;cursor:not-allowed;transform:none;box-shadow:none;opacity:0.6}
+        .btn-secondary{background:#2980b9}.btn-danger{background:#e74c3c}.btn-warning{background:var(--warning)}.btn-info{background:#00bcd4;color:white}.btn-purple{background:#8e44ad;color:white}
+        .btn-sm{padding:6px 12px;font-size:12px}.btn-xs{padding:4px 8px;font-size:11px}
+        .logout-btn{background:#e74c3c;color:white;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;font-size:14px}.logout-btn:hover{background:#c0392b}
+        .user-info{background:#e8f4f8;padding:15px 20px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+        .user-info span{font-weight:bold;color:var(--dark-heading);font-size:15px}
+        .admin-badge{background:#8e44ad;color:white;padding:3px 10px;border-radius:12px;font-size:11px;margin-left:8px}
+        .kullanici-badge{background:#e3f2fd;color:#1565c0;padding:3px 10px;border-radius:12px;font-size:11px;margin-left:8px}
+        .sync-status{font-size:12px;margin-left:10px}.sync-status.online{color:#27ae60}.sync-status.offline{color:#e74c3c}
+        .form-group{margin:15px 0}label{font-weight:600;display:block;margin-bottom:5px;color:#333;font-size:13px}
+        select,input[type="text"],input[type="number"],input[type="date"],input[type="password"]{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;transition:border 0.2s}
+        select:focus,input:focus{outline:none;border-color:#2980b9}
+        .info-note{background:#fff3cd;border:1px solid #ffe69c;padding:15px;border-radius:8px;margin:15px 0;color:#856404;font-size:14px}
+        .admin-note{background:#e8f5e9;border:1px solid #66bb6a;padding:15px;border-radius:8px;margin:15px 0;color:#2e7d32;font-size:14px}
+        .user-note{background:#fff3cd;border:1px solid #ff9800;padding:15px;border-radius:8px;margin:15px 0;color:#e65100;font-size:14px}
+        table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+        th,td{border:1px solid #e0e0e0;padding:8px 10px;text-align:center}
+        th{background-color:#2c3e50;color:white;position:sticky;top:0;z-index:10;font-size:12px;font-weight:600}
+        th.sortable{cursor:pointer;user-select:none}th.sortable:hover{background-color:#34495e}th .sort-arrow{margin-left:4px;font-size:10px}
+        tr:hover{background-color:#f8fafc}tr.kilitli{background-color:#fff8e1}
+        .small-input{width:70px;padding:6px;text-align:center;border:1px solid #ddd;border-radius:4px}
+        .plaka-input{width:80px;background:#f0f0f0;padding:6px;text-align:center;font-size:12px;border:1px solid #ddd;border-radius:4px}
+        .toplam-input{width:90px;background:#e8f5e9;font-weight:bold;padding:6px;text-align:center;font-size:12px;border:1px solid #ddd;border-radius:4px}
+        .checkbox-col{width:40px}.gecmis-table-container{max-height:600px;overflow-y:auto;border:1px solid #e0e0e0;margin:10px 0;border-radius:8px}
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:1000}
+        .modal-content{background:white;margin:3% auto;padding:25px;width:95%;max-width:900px;border-radius:12px;position:relative;max-height:90vh;overflow-y:auto}
+        .close-modal{position:absolute;top:15px;right:20px;font-size:28px;cursor:pointer;color:#999}.close-modal:hover{color:#333}
+        .pagination{display:flex;gap:6px;justify-content:center;margin:15px 0;flex-wrap:wrap}
+        .pagination button{padding:8px 14px;cursor:pointer;border:1px solid #ddd;background:white;border-radius:6px;font-size:13px}
+        .pagination button:hover:not(:disabled){background:#f0f0f0}.pagination button:disabled{opacity:0.5;cursor:not-allowed}
+        .detay-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee;align-items:center}
+        .detay-label{font-weight:600;color:#2c3e50;min-width:140px}.detay-value{color:#333;flex:1;text-align:right}
+        .detay-edit-section{background:#f8f9fa;padding:20px;border-radius:8px;margin:20px 0;border:2px solid var(--primary)}
+        .edit-table{width:100%;border-collapse:collapse;margin-top:10px}.edit-table th{background:#2980b9;font-size:11px}.edit-table td{padding:6px}
+        .kalem-ekle-btn{background:var(--success);color:white;border:none;padding:8px 15px;border-radius:6px;cursor:pointer;margin-top:10px;font-size:14px}
+        .kalem-sil-btn{background:#e74c3c;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:12px}
+        .action-buttons{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
+        .filtre-satir{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:15px;background:#f8f9fa;padding:15px;border-radius:8px}.filtre-satir>div{flex:1;min-width:140px}
+        .excel-actions{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;gap:10px;flex-wrap:wrap;background:#e3f2fd;padding:12px 15px;border-radius:8px}
+        .select-info{font-size:14px;color:#1565c0;font-weight:500}
+        .hidden{display:none!important}.success{color:green;font-weight:bold}.error{color:red;font-weight:bold}
+        .stok-select{width:150px;padding:6px;border:1px solid #4fc3f7;border-radius:4px;font-size:12px}
+        .miktar-input{width:70px;padding:6px;text-align:center;border:1px solid #4fc3f7;border-radius:4px}
+        .plaka-display{width:70px;padding:6px;text-align:center;background:#f0f0f0;border:1px solid #ddd;border-radius:4px;font-size:12px}
+        .toplam-display{width:80px;padding:6px;text-align:center;background:#e8f8e8;font-weight:bold;border:1px solid #ddd;border-radius:4px;font-size:12px}
+        .edit-aciklama{width:130px;padding:6px;border:1px solid #4fc3f7;border-radius:4px;font-size:11px}
+        .stok-isim{font-size:11px;color:#666;text-align:left}
+        .kilitli-bilgi{background:#ffe0b2;border:1px solid #ff9800;padding:12px 18px;border-radius:8px;margin:10px 0;color:#e65100;font-weight:600;display:flex;align-items:center;gap:10px}
+        .stok-duzenle-section{background:#f8f9fa;padding:25px;border-radius:10px;margin:20px 0;border:2px solid #8e44ad}
+        .stok-duzenle-section h3{color:#8e44ad;margin-bottom:20px;font-size:20px}
+        .stok-form-row{display:flex;gap:15px;flex-wrap:wrap;align-items:flex-end}.stok-form-row>div{flex:1;min-width:150px}
+        .stok-card{background:white;padding:12px 15px;border-radius:8px;margin:8px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-left:4px solid #2980b9}
+        .stok-arama{margin-bottom:15px}.stok-arama input{padding:10px;border:2px solid #2980b9;border-radius:6px;width:100%;font-size:14px}
+        .ozet-container{background:linear-gradient(135deg,#1a237e 0%,#283593 100%);padding:20px;border-radius:12px;margin:15px 0;display:flex;flex-wrap:wrap;gap:20px;justify-content:space-around}
+        .ozet-item{text-align:center;background:rgba(255,255,255,0.1);padding:15px 25px;border-radius:10px;min-width:150px;flex:1}
+        .ozet-label{color:#b0bec5;font-size:12px;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
+        .ozet-deger{color:#fff;font-size:28px;font-weight:700}
+        .ajanda-section{background:#f8f9fa;padding:25px;border-radius:10px;margin:20px 0;border:2px solid #8e44ad}
+        .ajanda-section h3{color:#8e44ad;margin-bottom:20px}
+        .ajanda-form-row{display:flex;gap:15px;flex-wrap:wrap;align-items:flex-end;margin-bottom:15px}.ajanda-form-row>div{flex:1;min-width:150px}
+        .ajanda-not-input{width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-size:12px}
+        .ajanda-table-container{max-height:500px;overflow-y:auto}
     </style>
 </head>
 <body>
@@ -164,18 +114,15 @@
 <div class="main-page" id="mainPage">
     <div class="container">
         <h1>📋 SAC1 Günlük Sac Kesim <span id="syncStatus" class="sync-status">🔄 Bağlanıyor...</span></h1>
-
         <div class="user-info">
             <span>👤 <span id="currentUser">-</span> <span id="userRolBadge"></span></span>
-            <div style="display:flex; gap:10px;">
-                <button class="btn btn-purple" id="ajandaBtn" style="display:none;">📝 Ajanda</button>
-                <button class="btn btn-purple" id="stokDuzenleBtn" style="display:none;">📦 Stok Düzenle</button>
+            <div style="display:flex;gap:10px">
+                <button class="btn btn-purple" id="ajandaBtn" style="display:none">📝 Ajanda</button>
+                <button class="btn btn-purple" id="stokDuzenleBtn" style="display:none">📦 Stok Düzenle</button>
                 <button class="logout-btn" id="logoutBtn">Çıkış Yap</button>
             </div>
         </div>
-
         <div id="rolBilgiAlani"></div>
-
         <div class="header-buttons">
             <button class="btn" id="yeniGirisBtn">➕ Yeni Giriş</button>
             <button class="btn btn-secondary" id="oncekiGirislerBtn">📂 Önceki Girişler</button>
@@ -183,48 +130,55 @@
 
         <div id="yeniGirisAlan">
             <div class="form-group"><label>Stok Grubu Seçiniz:</label><select id="stokGrubu"><option value="">-- Seçiniz --</option><option value="430">430</option><option value="DKP">DKP</option><option value="GALVANIZ">GALVANİZ</option><option value="304">304</option><option value="316">316</option><option value="201">201</option><option value="HRD">HRD (Tümü)</option></select></div>
-            <div class="form-group" id="urunSecim" style="display:none;"><label>Ürün Seçiniz (Ctrl+Click ile çoklu seçim):</label><select id="urunKodu" multiple size="8" style="height:180px; font-size:13px;"></select></div>
-            <div id="tabloAlan" style="display:none;"></div>
+            <div class="form-group" id="urunSecim" style="display:none"><label>Ürün Seçiniz (Ctrl+Click ile çoklu seçim):</label><select id="urunKodu" multiple size="8" style="height:180px;font-size:13px"></select></div>
+            <div id="tabloAlan" style="display:none"></div>
             <div class="action-buttons"><button class="btn" id="kaydetBtn">💾 Kaydet</button><button class="btn btn-secondary" id="kayitSonrasiGecmisBtn">📂 Kaydet ve Önceki Girişlere Git</button></div>
-            <div id="mesaj" style="margin-top:15px;"></div>
+            <div id="mesaj" style="margin-top:15px"></div>
         </div>
 
         <div id="oncekiGirislerAlan" class="hidden">
             <h2>📂 SAC1 Önceki Girişler</h2>
-            <div class="form-group" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;"><div style="min-width:200px;"><label>📅 Özet Tarihi</label><input type="date" id="ozetTarihInput"></div><div><button class="btn btn-info btn-sm" id="ozetGosterBtn">📊 Özeti Göster</button></div><div><button class="btn btn-secondary btn-sm" id="ozetTemizleBtn">🔄 Tüm Tarihler</button></div></div>
-            <div id="ozetAlani" style="display:none;"><div class="ozet-container" id="ozetIcerik"></div></div>
-            <div class="filtre-satir"><div><label>Seri No</label><input type="text" id="filtre_seri" placeholder="Filtrele..."></div><div><label>Sıra No</label><input type="text" id="filtre_sira" placeholder="Filtrele..."></div><div><label>Grup</label><select id="filtre_grup"><option value="">-- Tümü --</option><option value="430">430</option><option value="DKP">DKP</option><option value="GALVANIZ">GALVANİZ</option><option value="304">304</option><option value="316">316</option><option value="201">201</option><option value="HRD">HRD</option></select></div><div><label>Kayıt Tarihi</label><input type="date" id="filtre_tarih"></div><div style="display:flex; align-items:flex-end; gap:8px;"><button class="btn btn-secondary btn-sm" id="filtreUygulaBtn">🔍 Filtre</button><button class="btn btn-danger btn-sm" id="filtreTemizleBtn">🗑️ Temizle</button></div></div>
+            <div class="form-group" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+                <div style="min-width:160px"><label>📅 Başlangıç Tarihi</label><input type="date" id="ozetBaslangicTarih"></div>
+                <div style="min-width:160px"><label>📅 Bitiş Tarihi</label><input type="date" id="ozetBitisTarih"></div>
+                <div><button class="btn btn-info btn-sm" id="ozetGosterBtn">📊 Özeti Göster</button></div>
+                <div><button class="btn btn-secondary btn-sm" id="ozetTemizleBtn">🔄 Temizle</button></div>
+                <div><button class="btn btn-warning btn-sm" id="ozetExcelBtn" style="display:none">📎 Özeti Excel'e Aktar</button></div>
+            </div>
+            <div id="ozetAlani" style="display:none"><div class="ozet-container" id="ozetIcerik"></div></div>
+            <div class="filtre-satir"><div><label>Seri No</label><input type="text" id="filtre_seri" placeholder="Filtrele..."></div><div><label>Sıra No</label><input type="text" id="filtre_sira" placeholder="Filtrele..."></div><div><label>Grup</label><select id="filtre_grup"><option value="">-- Tümü --</option><option value="430">430</option><option value="DKP">DKP</option><option value="GALVANIZ">GALVANİZ</option><option value="304">304</option><option value="316">316</option><option value="201">201</option><option value="HRD">HRD</option></select></div><div><label>Kayıt Tarihi</label><input type="date" id="filtre_tarih"></div><div style="display:flex;align-items:flex-end;gap:8px"><button class="btn btn-secondary btn-sm" id="filtreUygulaBtn">🔍 Filtre</button><button class="btn btn-danger btn-sm" id="filtreTemizleBtn">🗑️ Temizle</button></div></div>
             <div class="excel-actions" id="excelActionsDiv"><div class="select-info">✅ <span id="seciliSayi">0</span> evrak seçili</div><div><button class="btn btn-info btn-sm" id="seciliExceleAktarBtn">📎 Excel'e Aktar</button><button class="btn btn-warning btn-sm" id="tumunuSecBtn">☑️ Tümünü Seç</button><button class="btn btn-secondary btn-sm" id="secimiTemizleBtn">⬜ Seçimi Temizle</button></div></div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span id="kayitSayisi" style="padding:8px; background:#e8f4f8; border-radius:6px; font-size:13px;"></span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:10px"><span id="kayitSayisi" style="padding:8px;background:#e8f4f8;border-radius:6px;font-size:13px"></span></div>
             <div class="gecmis-table-container" id="gecmisTablosu"></div>
             <div class="pagination" id="paginationContainer"></div>
-            <div style="margin-top:20px;"><button class="btn btn-secondary" id="yeniKayitDonBtn">➕ Yeni Kayıt Ekranına Dön</button></div>
+            <div style="margin-top:20px"><button class="btn btn-secondary" id="yeniKayitDonBtn">➕ Yeni Kayıt Ekranına Dön</button></div>
         </div>
 
         <div id="stokDuzenleAlan" class="hidden">
             <h2>📦 Stok Düzenleme <span class="admin-badge">Sadece Admin</span></h2>
-            <div class="stok-duzenle-section"><h3>➕ Yeni Stok Ekle</h3><div class="stok-form-row"><div><label>Grup</label><select id="yeniStokGrup"><option value="430">430</option><option value="DKP">DKP</option><option value="GALVANIZ">GALVANİZ</option><option value="304">304</option><option value="316">316</option><option value="201">201</option></select></div><div><label>Stok Kodu</label><input type="text" id="yeniStokKodu" placeholder="Örn: HC1.0100"></div><div><label>Stok İsmi</label><input type="text" id="yeniStokIsmi" placeholder="Örn: 430 SB 0,5X3000X1500..."></div><div><label>1 Plaka (kg)</label><input type="number" id="yeniStokPlaka" placeholder="Örn: 17.7746" step="0.0001"></div><div><button class="btn btn-success" id="stokEkleBtn">➕ Stok Ekle</button></div></div><div id="stokEkleMesaj" style="margin-top:10px;"></div></div>
-            <div class="stok-duzenle-section"><h3>📋 Mevcut Stoklar</h3><div class="stok-arama"><input type="text" id="stokArama" placeholder="🔍 Stok kodu veya isim ile ara..."></div><div id="stokListesi" style="max-height: 600px; overflow-y: auto;"></div></div>
-            <div style="margin-top:20px;"><button class="btn btn-secondary" id="stokDuzenleCikBtn">↩️ Ana Sayfaya Dön</button></div>
+            <div class="stok-duzenle-section"><h3>➕ Yeni Stok Ekle</h3><div class="stok-form-row"><div><label>Grup</label><select id="yeniStokGrup"><option value="430">430</option><option value="DKP">DKP</option><option value="GALVANIZ">GALVANİZ</option><option value="304">304</option><option value="316">316</option><option value="201">201</option></select></div><div><label>Stok Kodu</label><input type="text" id="yeniStokKodu" placeholder="Örn: HC1.0100"></div><div><label>Stok İsmi</label><input type="text" id="yeniStokIsmi" placeholder="Örn: 430 SB 0,5X3000X1500..."></div><div><label>1 Plaka (kg)</label><input type="number" id="yeniStokPlaka" placeholder="Örn: 17.7746" step="0.0001"></div><div><button class="btn btn-success" id="stokEkleBtn">➕ Stok Ekle</button></div></div><div id="stokEkleMesaj" style="margin-top:10px"></div></div>
+            <div class="stok-duzenle-section"><h3>📋 Mevcut Stoklar</h3><div class="stok-arama"><input type="text" id="stokArama" placeholder="🔍 Stok kodu veya isim ile ara..."></div><div id="stokListesi" style="max-height:600px;overflow-y:auto"></div></div>
+            <div style="margin-top:20px"><button class="btn btn-secondary" id="stokDuzenleCikBtn">↩️ Ana Sayfaya Dön</button></div>
         </div>
 
         <div id="ajandaAlan" class="hidden">
             <h2>📝 Ajanda / Not Defteri <span class="admin-badge">Sadece Admin</span></h2>
-            <div class="ajanda-section"><h3>📅 Dönem Seçimi</h3><div class="ajanda-form-row"><div><label>Yıl</label><select id="ajandaYil"></select></div><div><label>Ay</label><select id="ajandaAy"><option value="1">Ocak</option><option value="2">Şubat</option><option value="3">Mart</option><option value="4">Nisan</option><option value="5">Mayıs</option><option value="6">Haziran</option><option value="7">Temmuz</option><option value="8">Ağustos</option><option value="9">Eylül</option><option value="10">Ekim</option><option value="11">Kasım</option><option value="12">Aralık</option></select></div><div><button class="btn btn-info" id="ajandaGetirBtn">📋 Getir</button></div><div><button class="btn btn-success" id="ajandaKaydetBtn">💾 Kaydet</button></div><div><button class="btn btn-warning" id="ajandaExcelBtn">📎 Excel'e Aktar</button></div></div><div id="ajandaMesaj" style="margin-top:10px;"></div></div>
+            <div class="ajanda-section"><h3>📅 Dönem Seçimi</h3><div class="ajanda-form-row"><div><label>Yıl</label><select id="ajandaYil"></select></div><div><label>Ay</label><select id="ajandaAy"><option value="1">Ocak</option><option value="2">Şubat</option><option value="3">Mart</option><option value="4">Nisan</option><option value="5">Mayıs</option><option value="6">Haziran</option><option value="7">Temmuz</option><option value="8">Ağustos</option><option value="9">Eylül</option><option value="10">Ekim</option><option value="11">Kasım</option><option value="12">Aralık</option></select></div><div><button class="btn btn-info" id="ajandaGetirBtn">📋 Getir</button></div><div><button class="btn btn-success" id="ajandaKaydetBtn">💾 Kaydet</button></div><div><button class="btn btn-warning" id="ajandaExcelBtn">📎 Excel'e Aktar</button></div></div><div id="ajandaMesaj" style="margin-top:10px"></div></div>
             <div class="ajanda-table-container" id="ajandaTablosu"></div>
-            <div style="margin-top:20px;"><button class="btn btn-secondary" id="ajandaCikBtn">↩️ Ana Sayfaya Dön</button></div>
+            <div style="margin-top:20px"><button class="btn btn-secondary" id="ajandaCikBtn">↩️ Ana Sayfaya Dön</button></div>
         </div>
     </div>
 </div>
 
-<div id="detayModal" class="modal"><div class="modal-content"><span class="close-modal" onclick="kapatModal('detayModal')">&times;</span><h2>📄 Evrak Detayı ve Düzenleme</h2><div id="detayKilitBilgi"></div><div id="detayIcerik"></div><div id="detayDuzenlemeAlani" style="display:none;"></div><div class="action-buttons"><button class="btn btn-info" id="detayDuzenleBtn">🔓 Düzenle</button><button class="btn btn-success hidden" id="detayKaydetBtn">💾 Değişiklikleri Kaydet</button><button class="btn btn-danger" id="detaySilBtn">🗑️ Evrakı Sil</button><button class="btn btn-secondary" onclick="kapatModal('detayModal')">Kapat</button></div></div></div>
-<div id="stokDuzenleModal" class="modal"><div class="modal-content" style="max-width:600px;"><span class="close-modal" onclick="kapatModal('stokDuzenleModal')">&times;</span><h2>✏️ Stok Düzenle</h2><div class="form-group"><label>Stok Kodu</label><input type="text" id="duzenleStokKodu" readonly style="background:#f0f0f0;"></div><div class="form-group"><label>Grup</label><select id="duzenleStokGrup"><option value="430">430</option><option value="DKP">DKP</option><option value="GALVANIZ">GALVANİZ</option><option value="304">304</option><option value="316">316</option><option value="201">201</option></select></div><div class="form-group"><label>Stok İsmi</label><input type="text" id="duzenleStokIsmi"></div><div class="form-group"><label>1 Plaka (kg)</label><input type="number" id="duzenleStokPlaka" step="0.0001"></div><div class="action-buttons"><button class="btn btn-success" id="stokGuncelleBtn">💾 Güncelle</button><button class="btn btn-secondary" onclick="kapatModal('stokDuzenleModal')">❌ İptal</button></div></div></div>
+<div id="detayModal" class="modal"><div class="modal-content"><span class="close-modal" onclick="kapatModal('detayModal')">&times;</span><h2>📄 Evrak Detayı ve Düzenleme</h2><div id="detayKilitBilgi"></div><div id="detayIcerik"></div><div id="detayDuzenlemeAlani" style="display:none"></div><div class="action-buttons"><button class="btn btn-info" id="detayDuzenleBtn">🔓 Düzenle</button><button class="btn btn-success hidden" id="detayKaydetBtn">💾 Değişiklikleri Kaydet</button><button class="btn btn-danger" id="detaySilBtn">🗑️ Evrakı Sil</button><button class="btn btn-secondary" onclick="kapatModal('detayModal')">Kapat</button></div></div></div>
+<div id="stokDuzenleModal" class="modal"><div class="modal-content" style="max-width:600px"><span class="close-modal" onclick="kapatModal('stokDuzenleModal')">&times;</span><h2>✏️ Stok Düzenle</h2><div class="form-group"><label>Stok Kodu</label><input type="text" id="duzenleStokKodu" readonly style="background:#f0f0f0"></div><div class="form-group"><label>Grup</label><select id="duzenleStokGrup"><option value="430">430</option><option value="DKP">DKP</option><option value="GALVANIZ">GALVANİZ</option><option value="304">304</option><option value="316">316</option><option value="201">201</option></select></div><div class="form-group"><label>Stok İsmi</label><input type="text" id="duzenleStokIsmi"></div><div class="form-group"><label>1 Plaka (kg)</label><input type="number" id="duzenleStokPlaka" step="0.0001"></div><div class="action-buttons"><button class="btn btn-success" id="stokGuncelleBtn">💾 Güncelle</button><button class="btn btn-secondary" onclick="kapatModal('stokDuzenleModal')">❌ İptal</button></div></div></div>
 
 <script>
 const sac1FirebaseConfig={apiKey:"AIzaSyDDFOpgvi0r3YHsZvYV6JgdCrZp1QZazPY",authDomain:"sac1-kesim.firebaseapp.com",databaseURL:"https://sac1-kesim-default-rtdb.europe-west1.firebasedatabase.app",projectId:"sac1-kesim",storageBucket:"sac1-kesim.firebasestorage.app",messagingSenderId:"419582241444",appId:"1:419582241444:web:2fdb127ca47bae8a011431"};
 firebase.initializeApp(sac1FirebaseConfig);const database=firebase.database();
 
-const SERI_NO="SD";let aktifKullanici=null,gecmisVeriler=[],ajandaVerileri={},siraNo=0,silinenSiralar=[],aktarilanEvraklar=[],seciliEvrakIndisleri=new Set(),currentPage=1,pageSize=20,filteredVeriler=[],sortColumn=null,sortDirection='asc',detayEditingIdx=null,duzenlenenStokKodu=null,seciliOzetTarih="";
+const SERI_NO="SD";let aktifKullanici=null,gecmisVeriler=[],ajandaVerileri={},siraNo=0,silinenSiralar=[],aktarilanEvraklar=[],seciliEvrakIndisleri=new Set(),currentPage=1,pageSize=20,filteredVeriler=[],sortColumn=null,sortDirection='asc',detayEditingIdx=null,duzenlenenStokKodu=null;
+let seciliOzetBaslangic="",seciliOzetBitis="",ozetSonuc=[];
 const kullanicilar={SAC1:"sac1sac",Muhammed:"mhm2468",Burak:"brk2468"};const adminKullanicilar=["Muhammed","Burak"];
 function isAdmin(){return adminKullanicilar.includes(aktifKullanici)}
 
@@ -244,7 +198,6 @@ function formatNumberDisplay(n){return formatNumber(n).replace('.',',')}
 
 function saveToFirebase(){let gs={};Object.keys(stokBilgileri).forEach(k=>{gs[k.replace(/\./g,'_DOT_')]=stokBilgileri[k]});let gp={};Object.keys(plakaWeights).forEach(k=>{gp[k.replace(/\./g,'_DOT_')]=plakaWeights[k]});let gg={};Object.keys(stokGruplari).forEach(k=>{gg[k.replace(/\./g,'_DOT_')]=stokGruplari[k]});const d={gecmisVeriler,siraNo,silinenSiralar,aktarilanEvraklar,stokBilgileri:gs,plakaWeights:gp,stokGruplari:gg,ajandaVerileri,lastUpdated:firebase.database.ServerValue.TIMESTAMP};return database.ref('sac1Kesim/').set(d)}
 function loadFromFirebase(){database.ref('sac1Kesim/').once('value').then(sn=>{const d=sn.val();if(d){if(d.gecmisVeriler)gecmisVeriler=d.gecmisVeriler;if(d.siraNo!==undefined)siraNo=d.siraNo;if(d.silinenSiralar)silinenSiralar=d.silinenSiralar;if(d.aktarilanEvraklar)aktarilanEvraklar=d.aktarilanEvraklar;if(d.ajandaVerileri)ajandaVerileri=d.ajandaVerileri;if(d.stokBilgileri){let ts={};Object.keys(d.stokBilgileri).forEach(k=>{ts[k.replace(/_DOT_/g,'.')]=d.stokBilgileri[k]});stokBilgileri=ts}if(d.plakaWeights){let tp={};Object.keys(d.plakaWeights).forEach(k=>{tp[k.replace(/_DOT_/g,'.')]=d.plakaWeights[k]});plakaWeights=tp}if(d.stokGruplari){let tg={};Object.keys(d.stokGruplari).forEach(k=>{tg[k.replace(/_DOT_/g,'.')]=d.stokGruplari[k]});stokGruplari=tg}stokGruplariniGuncelle();urunleriGuncelle();gecmisVeriler=gecmisVeriler.filter(e=>!silinenSiralar.includes(e["Sıra No"]));document.getElementById("syncStatus").innerHTML="✅ SAC1 Firebase Aktif";document.getElementById("syncStatus").className="sync-status online"}else{saveToFirebase();document.getElementById("syncStatus").innerHTML="✅ SAC1 Firebase Aktif (Yeni)";document.getElementById("syncStatus").className="sync-status online"}if(aktifKullanici){rolBilgiGuncelle();stokDuzenleButonKontrol();excelButonlariniKontrol();ajandaButonKontrol()}yeniStoklariKontrolEtVeGuncelle()}).catch(e=>{console.error("Firebase okuma hatası:",e);document.getElementById("syncStatus").innerHTML="⚠️ Bağlantı hatası";document.getElementById("syncStatus").className="sync-status offline"})}
-
 function yeniStoklariKontrolEtVeGuncelle(){let g=false;const ys={"HC1.0015":{isim:"430 SB 0,5X1680X1000 PASLANMAZ SAC PLAKA",plaka:6.6400},"HC1.0018":{isim:"430 SB 0,5X1590X850 PASLANMAZ SAC PLAKAS",plaka:5.3400},"HC1.0021":{isim:"430 SB 0,8X2050X900 PASLANMAZ SAC PLAKA",plaka:11.6600},"HC1.0022":{isim:"430 SB 0,8X1600X1030 PASLANMAZ SAC PLAKA",plaka:10.9400},"HC1.0024":{isim:"430 SB 0,8X3000X1500 PASLANMAZ SAC PLAKA",plaka:28.4400},"HC1.0025":{isim:"430 SB 0,8X1750X800 PASLANMAZ SAC PLAKA",plaka:8.8500},"HC1.0027":{isim:"430 SB 1X3000X1500 PASLANMAZ SAC PLAKA",plaka:35.5500},"HC1.0052":{isim:"430 SB 0,8X2000X1000 PASLANMAZ SAC PLAKA",plaka:12.3400},"HC1.0058":{isim:"430 SB 0,8X1250X2500 PASLANMAZ SAC PLAKA",plaka:19.7500},"HC1.0062":{isim:"430 SB 0,5X535X425 PASLANMAZ SAC PLAKA (TEZGAH TİP KAPI İÇ SACI)",plaka:0.9000},"HC1.0064":{isim:"430 SB 1X2000X1000 PASLANMAZ SAC PLAKA",plaka:15.8000},"HC1.0073":{isim:"430 SB 0,6X1750X850 PASLANMAZ SAC PLAKA",plaka:7.0500},"HC1.0074":{isim:"430 SB 0,6X2100X950 PASLANMAZ SAC PLAKA",plaka:9.4600},"HC1.0075":{isim:"430 SB 1X1660X850 PASLANMAZ SAC PLAKA",plaka:11.1500},"HC1.0076":{isim:"430 SB 1X2120X850 PASLANMAZ SAC PLAKA",plaka:14.2400},"HC1.0077":{isim:"430 SB 1X2660X850 PASLANMAZ SAC PLAKA",plaka:17.8600},"HC1.0078":{isim:"430 SB 0,6X1250X2500MM PASLANMAZ SAC PLAKA",plaka:2.0000},"HG1.0004":{isim:"GALVANİZ SAC 1,5X3000X1500 PLAKA SAC",plaka:55.6200},"HG1.0007":{isim:"GALVANİZ 0,5X800X3000 PLAKA SAC",plaka:9.4800},"HG1.0008":{isim:"GALVANİZ 0,5X800X2800 PLAKA SAC",plaka:8.8500},"HG1.0010":{isim:"GALVANİZ 0,5X800X2080 PLAKA SAC",plaka:6.6000},"HG1.0011":{isim:"GALVANİZ 0,5X800X1700 PLAKA SAC",plaka:5.3700},"HG1.0012":{isim:"GALVANİZ 0,5X1500X3000 PLAKA SAC",plaka:17.7700},"HG1.0013":{isim:"GALVANİZ 3X2000X1000 PLAKA SAC",plaka:48.0500},"HG1.0016":{isim:"GALVANİZ 0,5X1250X2500 PLAKA SAC",plaka:12.3400},"HG1.0018":{isim:"GALVANİZ SAC 1,5X2500X1250 PLAKA SAC",plaka:37.0300},"HG1.0019":{isim:"GALVANİZ BOYALI SAC 0,5X1250X2000 RAL 9002 (BEYAZ)",plaka:9.8800},"HG1.0020":{isim:"GALVANİZ 0,5X2000X1000 PLAKA SAC",plaka:7.9000},"HG1.0021":{isim:"GALVANİZ BOYALI SAC 0,5X1250X2300 RAL 9002 (BEYAZ)",plaka:11.3600},"HN1.0011":{isim:"304 SB 1X3000X1500 PASLANMAZ SAC PLAKA",plaka:48.0500},"HN1.0012":{isim:"304 SB 0,8X3000X1500 PASLANMAZ SAC PLAKA",plaka:28.4400},"HN1.0013":{isim:"304 SB 0,5X1590X850 PASLANMAZ SAC PLAKAS",plaka:5.3400},"HN1.0015":{isim:"304 SB 0,5X2000X1000 PASLANMAZ SAC PLAKA",plaka:7.9000},"HN1.0016":{isim:"304 SB 0,5X1560X1000 PASLANMAZ SAC PLAKA",plaka:6.1600},"HN1.0018":{isim:"304 SB 0,5X3000X1500 PASLANMAZ SAC PLAKA",plaka:17.7700},"HN1.0019":{isim:"304 SB 0,8X1030X1600 PASLANMAZ SAC PLAKA",plaka:10.4100},"HN1.0020":{isim:"304 SB 0,5X1000X1680 PASLANMAZ SAC PLAKA",plaka:6.6400},"HN1.0021":{isim:"304 SB 0,8X2050X900 PASLANMAZ SAC PLAKA",plaka:11.6600},"HN1.0022":{isim:"304 SB 0,8X1750X800 PASLANMAZ SAC PLAKA",plaka:8.8500},"HN1.0025":{isim:"304 SB 0,8X2000X1000 PASLANMAZ SAC PLAKA",plaka:12.3400},"HN1.0026":{isim:"304 SB 0,8X2500X1250 PASLANMAZ SAC PLAKA",plaka:19.7500},"HN1.0028":{isim:"304 SB 1X2000X1000 PASLANMAZ SAC",plaka:15.8000},"HN1.0029":{isim:"304 SB 0,5X1515X595 MM (610 KAPI İÇ SACI)",plaka:3.5600},"HN1.0032":{isim:"304 SB 0,5X1250X2500 PASLANMAZ SAC PLAKA",plaka:12.3400},"HN1.0035":{isim:"304 SB 1X2660X850 PASLANMAZ SAC PLAKA",plaka:17.8600},"HN1.0036":{isim:"304 SB 0,6X1750X850 PASLANMAZ SAC PLAKA",plaka:7.0500},"HN1.0037":{isim:"304 SB 0,6X2100X950 PASLANMAZ SAC PLAKA",plaka:9.4600},"HN1.0038":{isim:"304 SB 1X1660X850 PASLANMAZ SAC",plaka:11.1500},"HN1.0040":{isim:"304 SB 1X2120X850 PASLANMAZ SAC",plaka:14.2400},"HN1.0043":{isim:"304 SB 0,5X535X425 PASLANMAZ SAC (TEZGAH TİP KAPI İÇ SACI)",plaka:0.9000},"HN1.0048":{isim:"304 SB 2X1000X2000 PASLANMAZ SAC",plaka:28.4400},"HX1.0045":{isim:"316 SB 0,8X1250X2500 PASLANMAZ SAC",plaka:35.5500},"HX1.0046":{isim:"201 SB 0,8X1030X2000 PASLANMAZ SAC PLAKA",plaka:12.9900}};Object.keys(ys).forEach(k=>{if(!stokBilgileri[k]){stokBilgileri[k]=ys[k].isim;plakaWeights[k]=ys[k].plaka;g=true}});if(g){stokGruplariniGuncelle();urunleriGuncelle();saveToFirebase()}}
 
 function syncData(){saveToFirebase()}
@@ -273,7 +226,7 @@ document.getElementById("urunKodu").onchange=function(){let sec=Array.from(this.
 function kaydetVeGecmiseGit(yonlendir){let satirlar=document.querySelectorAll("#tabloAlan tbody tr");if(satirlar.length===0){document.getElementById("mesaj").innerHTML="<span class='error'>Lütfen en az bir ürün seçin!</span>";return false}let grup=document.getElementById("stokGrubu").value;if(!grup){document.getElementById("mesaj").innerHTML="<span class='error'>Lütfen stok grubu seçin!</span>";return false}let ms=getSiraNo();let kalemler=[];satirlar.forEach(tr=>{let sk=tr.cells[0]?tr.cells[0].textContent.trim():"";let si=tr.cells[1]?tr.cells[1].textContent.trim():"";let mi=tr.querySelector('.small-input');let pi=tr.querySelector('.plaka-input');let ti=tr.querySelector('.toplam-input');let ai=tr.querySelector('.aciklama-input');kalemler.push({"Stok Kodu":sk,"Stok İsmi":si,"Miktar":formatNumber(mi?mi.value:"0"),"1 Plaka (kg)":formatNumber(pi?pi.value:"0"),"Toplam Kg":formatNumber(ti?ti.value:"0"),"Açıklama":ai?ai.value:""})});let simdi=new Date();let evrak={"Seri No":SERI_NO,"Sıra No":ms,"Grup":grup,"Olusturan":aktifKullanici,"Duzenleyen":"","Duzenlendi":false,"DuzenlemeTarihi":"","Kayıt Tarihi":simdi.toLocaleDateString('tr-TR'),"Kayıt Saati":simdi.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),"Kalemler":kalemler};gecmisVeriler.push(evrak);siranoArtir();saveToFirebase();document.getElementById("mesaj").innerHTML="<span class='success'>✅ Evrak kaydedildi! Sıra No: "+ms+"</span>";document.getElementById("tabloAlan").innerHTML="";document.getElementById("tabloAlan").style.display="none";document.getElementById("urunKodu").selectedIndex=-1;document.getElementById("stokGrubu").selectedIndex=0;document.getElementById("urunSecim").style.display="none";if(yonlendir)setTimeout(()=>gecmisListesiniGoster(),800);return true}
 document.getElementById("kaydetBtn").onclick=()=>kaydetVeGecmiseGit(false);document.getElementById("kayitSonrasiGecmisBtn").onclick=()=>kaydetVeGecmiseGit(true);
 
-function gecmisListesiniGoster(){document.getElementById("yeniGirisAlan").classList.add("hidden");document.getElementById("oncekiGirislerAlan").classList.remove("hidden");document.getElementById("stokDuzenleAlan").classList.add("hidden");document.getElementById("ajandaAlan").classList.add("hidden");gecmisVeriler=gecmisVeriler.filter(e=>!silinenSiralar.includes(e["Sıra No"]));filteredVeriler=[...gecmisVeriler];currentPage=1;seciliEvrakIndisleri.clear();seciliOzetTarih="";document.getElementById("ozetTarihInput").value="";document.getElementById("ozetAlani").style.display="none";excelButonlariniKontrol();gecmisYukle()}
+function gecmisListesiniGoster(){document.getElementById("yeniGirisAlan").classList.add("hidden");document.getElementById("oncekiGirislerAlan").classList.remove("hidden");document.getElementById("stokDuzenleAlan").classList.add("hidden");document.getElementById("ajandaAlan").classList.add("hidden");gecmisVeriler=gecmisVeriler.filter(e=>!silinenSiralar.includes(e["Sıra No"]));filteredVeriler=[...gecmisVeriler];currentPage=1;seciliEvrakIndisleri.clear();seciliOzetBaslangic="";seciliOzetBitis="";ozetSonuc=[];document.getElementById("ozetBaslangicTarih").value="";document.getElementById("ozetBitisTarih").value="";document.getElementById("ozetAlani").style.display="none";document.getElementById("ozetExcelBtn").style.display="none";excelButonlariniKontrol();gecmisYukle()}
 function filtreUygula(){let s=document.getElementById("filtre_seri").value.toLowerCase();let si=document.getElementById("filtre_sira").value.toLowerCase();let g=document.getElementById("filtre_grup").value;let ft=document.getElementById("filtre_tarih").value;filteredVeriler=gecmisVeriler.filter(r=>{if(s&&!r["Seri No"].toString().toLowerCase().includes(s))return false;if(si&&!r["Sıra No"].toString().toLowerCase().includes(si))return false;if(g&&r["Grup"]!==g)return false;if(ft){let ff=new Date(ft).toLocaleDateString('tr-TR');if((r["Kayıt Tarihi"]||"")!==ff)return false}return true})}
 function sortTable(col){if(sortColumn===col)sortDirection=sortDirection==='asc'?'desc':'asc';else{sortColumn=col;sortDirection='asc'}currentPage=1;gecmisYukle()}window.sortTable=sortTable;
 function getSortArrow(col){if(sortColumn===col)return sortDirection==='asc'?' ▲':' ▼';return' ⇅'}
@@ -281,9 +234,37 @@ function gecmisYukle(){let c=document.getElementById("gecmisTablosu");let ks=doc
 document.getElementById("filtreUygulaBtn").onclick=()=>{currentPage=1;seciliEvrakIndisleri.clear();gecmisYukle()};
 document.getElementById("filtreTemizleBtn").onclick=()=>{document.getElementById("filtre_seri").value="";document.getElementById("filtre_sira").value="";document.getElementById("filtre_grup").value="";document.getElementById("filtre_tarih").value="";currentPage=1;seciliEvrakIndisleri.clear();gecmisYukle()};
 
-document.getElementById("ozetGosterBtn").onclick=function(){seciliOzetTarih=document.getElementById("ozetTarihInput").value;if(!seciliOzetTarih){alert("Lütfen bir tarih seçin!");return}ozetiGuncelle()};
-document.getElementById("ozetTemizleBtn").onclick=function(){seciliOzetTarih="";document.getElementById("ozetTarihInput").value="";document.getElementById("ozetAlani").style.display="none"};
-function ozetiGuncelle(){let oa=document.getElementById("ozetAlani");let oi=document.getElementById("ozetIcerik");if(!seciliOzetTarih){oa.style.display="none";return}let hedef=filteredVeriler.filter(e=>e["Kayıt Tarihi"]===new Date(seciliOzetTarih).toLocaleDateString('tr-TR'));if(hedef.length===0){oa.style.display="block";oi.innerHTML='<div class="ozet-item"><div class="ozet-label">📦 Seçili Tarih</div><div class="ozet-deger">Kayıt Yok</div></div>';return}oa.style.display="block";let tm=0,tk=0;hedef.forEach(e=>(e.Kalemler||[]).forEach(k=>{tm+=parseNumber(k["Miktar"]);tk+=parseNumber(k["Toplam Kg"])}));oi.innerHTML='<div class="ozet-item"><div class="ozet-label">📅 Tarih</div><div class="ozet-deger">'+new Date(seciliOzetTarih).toLocaleDateString('tr-TR')+'</div></div><div class="ozet-item"><div class="ozet-label">📦 Evrak Sayısı</div><div class="ozet-deger">'+hedef.length+'</div></div><div class="ozet-item"><div class="ozet-label">🔢 Toplam Miktar</div><div class="ozet-deger">'+formatNumberDisplay(tm)+'</div></div><div class="ozet-item"><div class="ozet-label">⚖️ Toplam Kg</div><div class="ozet-deger">'+formatNumberDisplay(tk)+' kg</div></div>'}
+// ==================== ÖZET TABLO (TARİH ARALIĞI) ====================
+document.getElementById("ozetGosterBtn").onclick=function(){
+    seciliOzetBaslangic=document.getElementById("ozetBaslangicTarih").value;
+    seciliOzetBitis=document.getElementById("ozetBitisTarih").value;
+    if(!seciliOzetBaslangic||!seciliOzetBitis){alert("Lütfen başlangıç ve bitiş tarihlerini seçin!");return}
+    if(seciliOzetBaslangic>seciliOzetBitis){alert("Başlangıç tarihi bitiş tarihinden büyük olamaz!");return}
+    ozetiGuncelle();
+};
+document.getElementById("ozetTemizleBtn").onclick=function(){
+    seciliOzetBaslangic="";seciliOzetBitis="";ozetSonuc=[];
+    document.getElementById("ozetBaslangicTarih").value="";document.getElementById("ozetBitisTarih").value="";
+    document.getElementById("ozetAlani").style.display="none";document.getElementById("ozetExcelBtn").style.display="none";
+};
+function ozetiGuncelle(){
+    let oa=document.getElementById("ozetAlani");let oi=document.getElementById("ozetIcerik");
+    if(!seciliOzetBaslangic||!seciliOzetBitis){oa.style.display="none";return}
+    let bas=new Date(seciliOzetBaslangic);let bit=new Date(seciliOzetBitis);
+    ozetSonuc=gecmisVeriler.filter(e=>{let kt=e["Kayıt Tarihi"];if(!kt)return false;let parts=kt.split('.');if(parts.length!==3)return false;let trh=new Date(parts[2],parts[1]-1,parts[0]);return trh>=bas&&trh<=bit});
+    if(ozetSonuc.length===0){oa.style.display="block";oi.innerHTML='<div class="ozet-item"><div class="ozet-label">📦 Seçili Aralık</div><div class="ozet-deger">Kayıt Yok</div></div>';document.getElementById("ozetExcelBtn").style.display="none";return}
+    oa.style.display="block";document.getElementById("ozetExcelBtn").style.display="inline-block";
+    let tm=0,tk=0;ozetSonuc.forEach(e=>(e.Kalemler||[]).forEach(k=>{tm+=parseNumber(k["Miktar"]);tk+=parseNumber(k["Toplam Kg"])}));
+    oi.innerHTML='<div class="ozet-item"><div class="ozet-label">📅 Tarih Aralığı</div><div class="ozet-deger" style="font-size:16px">'+new Date(seciliOzetBaslangic).toLocaleDateString('tr-TR')+' - '+new Date(seciliOzetBitis).toLocaleDateString('tr-TR')+'</div></div><div class="ozet-item"><div class="ozet-label">📦 Evrak Sayısı</div><div class="ozet-deger">'+ozetSonuc.length+'</div></div><div class="ozet-item"><div class="ozet-label">🔢 Toplam Miktar</div><div class="ozet-deger">'+formatNumberDisplay(tm)+'</div></div><div class="ozet-item"><div class="ozet-label">⚖️ Toplam Kg</div><div class="ozet-deger">'+formatNumberDisplay(tk)+' kg</div></div>';
+}
+document.getElementById("ozetExcelBtn").onclick=function(){
+    if(ozetSonuc.length===0){alert("Aktarılacak veri yok!");return}
+    let excelHtml='<html><head><meta charset="UTF-8"><style>th{background:#2c3e50;color:white;padding:8px}td{padding:8px;border:1px solid black}</style></head><body>';
+    excelHtml+='<h2>SAC1 Özet - '+new Date(seciliOzetBaslangic).toLocaleDateString('tr-TR')+' / '+new Date(seciliOzetBitis).toLocaleDateString('tr-TR')+'</h2>';
+    excelHtml+='<table border="1"><tr><th>Seri No</th><th>Sıra No</th><th>Grup</th><th>Oluşturan</th><th>Kayıt Tarihi</th><th>Stok Kodu</th><th>Stok İsmi</th><th>Miktar</th><th>1 Plaka</th><th>Toplam Kg</th><th>Açıklama</th></tr>';
+    ozetSonuc.forEach(e=>{(e.Kalemler||[]).forEach(k=>{excelHtml+='<tr><td>'+e["Seri No"]+'</td><td>'+e["Sıra No"]+'</td><td>'+e["Grup"]+'</td><td>'+(e["Olusturan"]||"")+'</td><td>'+(e["Kayıt Tarihi"]||"")+'</td><td>'+dotTemizle(k["Stok Kodu"]||"")+'</td><td>'+(k["Stok İsmi"]||"")+'</td><td>'+formatNumberDisplay(k["Miktar"])+'</td><td>'+formatNumberDisplay(k["1 Plaka (kg)"])+'</td><td>'+formatNumberDisplay(k["Toplam Kg"])+'</td><td>'+(k["Açıklama"]||"")+'</td></tr>'})});
+    excelHtml+='</table></body></html>';let blob=new Blob([excelHtml],{type:'application/vnd.ms-excel;charset=utf-8'});let link=document.createElement("a");link.href=URL.createObjectURL(blob);link.download="SAC1_Ozet_"+seciliOzetBaslangic+"_"+seciliOzetBitis+".xls";link.click();URL.revokeObjectURL(link.href);
+};
 
 document.getElementById("seciliExceleAktarBtn").onclick=function(){if(!isAdmin()){alert("Bu işlem sadece Admin tarafından yapılabilir!");return}if(seciliEvrakIndisleri.size===0){alert("Lütfen evrak seçin!");return}let secilen=[];seciliEvrakIndisleri.forEach(ix=>{if(gecmisVeriler[ix])secilen.push(gecmisVeriler[ix])});secilen.forEach(e=>{if(!aktarilanEvraklar.includes(e["Sıra No"]))aktarilanEvraklar.push(e["Sıra No"])});syncData();let excelHtml='<html><head><meta charset="UTF-8"><style>th{background:#2c3e50;color:white;padding:8px}td{padding:8px;border:1px solid black}</style></head><body><table border="1"><tr><th>Seri No</th><th>Sıra No</th><th>Grup</th><th>Oluşturan</th><th>Kayıt Tarihi</th><th>Kayıt Saati</th><th>Stok Kodu</th><th>Stok İsmi</th><th>Miktar</th><th>1 Plaka</th><th>Toplam Kg</th><th>Açıklama</th></tr>';secilen.forEach(e=>{(e.Kalemler||[]).forEach(k=>{excelHtml+='<tr><td>'+e["Seri No"]+'</td><td>'+e["Sıra No"]+'</td><td>'+e["Grup"]+'</td><td>'+(e["Olusturan"]||"")+'</td><td>'+(e["Kayıt Tarihi"]||"")+'</td><td>'+(e["Kayıt Saati"]||"")+'</td><td>'+dotTemizle(k["Stok Kodu"]||"")+'</td><td>'+(k["Stok İsmi"]||"")+'</td><td>'+formatNumberDisplay(k["Miktar"])+'</td><td>'+formatNumberDisplay(k["1 Plaka (kg)"])+'</td><td>'+formatNumberDisplay(k["Toplam Kg"])+'</td><td>'+(k["Açıklama"]||"")+'</td></tr>'})});excelHtml+='</table></body></html>';let blob=new Blob([excelHtml],{type:'application/vnd.ms-excel;charset=utf-8'});let link=document.createElement("a");link.href=URL.createObjectURL(blob);link.download="SAC1_kesim_"+new Date().toISOString().slice(0,10)+".xls";link.click();URL.revokeObjectURL(link.href);filteredVeriler=[...gecmisVeriler];gecmisYukle();alert(secilen.length+" evrak Excel'e aktarıldı! ✅")};
 document.getElementById("tumunuSecBtn").onclick=function(){if(!isAdmin())return;document.querySelectorAll('.evrak-checkbox').forEach(cb=>{cb.checked=true;seciliEvrakIndisleri.add(parseInt(cb.dataset.idx))});document.getElementById("seciliSayi").textContent=seciliEvrakIndisleri.size};
@@ -309,77 +290,16 @@ window.stokDuzenleModalAc=function(k){duzenlenenStokKodu=k;document.getElementBy
 document.getElementById("stokGuncelleBtn").onclick=function(){let k=duzenlenenStokKodu;if(!k)return;let yi=document.getElementById("duzenleStokIsmi").value.trim();let yps=document.getElementById("duzenleStokPlaka").value;let yg=document.getElementById("duzenleStokGrup").value;if(!yi||!yps){alert("Zorunlu alanlar!");return}let yp=parseNumber(yps);if(yp<=0){alert("Geçerli plaka!");return}stokBilgileri[k]=yi;plakaWeights[k]=yp;stokGruplari[k]=yg;urunleriGuncelle();syncData();document.getElementById("stokDuzenleModal").style.display="none";stokListesiniGoster(document.getElementById("stokArama").value)};
 window.stokSil=function(k){if(!confirm(dotTemizle(k)+" silinsin mi?"))return;delete stokBilgileri[k];delete plakaWeights[k];delete stokGruplari[k];urunleriGuncelle();syncData();stokListesiniGoster(document.getElementById("stokArama").value)};
 
-// ==================== AJANDA (GÜNCELLENDİ) ====================
-function ajandaSayfasiniAc(){
-    document.getElementById("yeniGirisAlan").classList.add("hidden");
-    document.getElementById("oncekiGirislerAlan").classList.add("hidden");
-    document.getElementById("stokDuzenleAlan").classList.add("hidden");
-    document.getElementById("ajandaAlan").classList.remove("hidden");
-    let ys=document.getElementById("ajandaYil");ys.innerHTML='';
-    let sy=new Date().getFullYear();
-    for(let y=sy-2;y<=sy+2;y++){ys.innerHTML+='<option value="'+y+'" '+(y===sy?'selected':'')+'>'+y+'</option>'}
-    document.getElementById("ajandaAy").value=new Date().getMonth()+1;
-    ajandaGetir();
-}
+function ajandaSayfasiniAc(){document.getElementById("yeniGirisAlan").classList.add("hidden");document.getElementById("oncekiGirislerAlan").classList.add("hidden");document.getElementById("stokDuzenleAlan").classList.add("hidden");document.getElementById("ajandaAlan").classList.remove("hidden");let ys=document.getElementById("ajandaYil");ys.innerHTML='';let sy=new Date().getFullYear();for(let y=sy-2;y<=sy+2;y++){ys.innerHTML+='<option value="'+y+'" '+(y===sy?'selected':'')+'>'+y+'</option>'}document.getElementById("ajandaAy").value=new Date().getMonth()+1;ajandaGetir()}
 document.getElementById("ajandaGetirBtn").onclick=ajandaGetir;
-function ajandaGetir(){
-    let yil=parseInt(document.getElementById("ajandaYil").value);
-    let ay=parseInt(document.getElementById("ajandaAy").value);
-    let gs=new Date(yil,ay,0).getDate();
-    let anahtar=yil+"_"+ay;
-    let kayitli=ajandaVerileri[anahtar]||{};
-    let h='<table><thead><tr><th>Gün</th><th>Tarih</th><th>Seri No</th><th>Açıklama / Sıra No</th></tr></thead><tbody>';
-    for(let g=1;g<=gs;g++){
-        let tarih=g+"/"+ay+"/"+yil;
-        let gk="gun_"+g;
-        let sn=kayitli[gk]?kayitli[gk].seri:"";
-        let aciklama=kayitli[gk]?(kayitli[gk].aciklama||kayitli[gk].sira||kayitli[gk].not||""):"";
-        h+='<tr><td>'+g+'</td><td>'+tarih+'</td>';
-        h+='<td><input type="text" class="ajanda-not-input ajanda-seri" data-gun="'+g+'" value="'+sn+'" style="width:100px;"></td>';
-        h+='<td><input type="text" class="ajanda-not-input ajanda-aciklama" data-gun="'+g+'" value="'+aciklama+'" style="width:100%;min-width:300px;" placeholder="Sıra numaralarını girin..."></td></tr>';
-    }
-    h+='</tbody></table>';
-    document.getElementById("ajandaTablosu").innerHTML=h;
-    document.getElementById("ajandaMesaj").innerHTML="";
-}
-document.getElementById("ajandaKaydetBtn").onclick=function(){
-    let yil=parseInt(document.getElementById("ajandaYil").value);
-    let ay=parseInt(document.getElementById("ajandaAy").value);
-    let anahtar=yil+"_"+ay;
-    let kayit={};
-    document.querySelectorAll("#ajandaTablosu tbody tr").forEach(tr=>{
-        let se=tr.querySelector('.ajanda-seri');let ae=tr.querySelector('.ajanda-aciklama');
-        if(se&&ae){let g=se.dataset.gun;kayit["gun_"+g]={seri:se.value,aciklama:ae.value}}
-    });
-    ajandaVerileri[anahtar]=kayit;
-    saveToFirebase().then(()=>{document.getElementById("ajandaMesaj").innerHTML="<span class='success'>✅ Ajanda kaydedildi! ("+ay+"/"+yil+")</span>"}).catch(()=>{document.getElementById("ajandaMesaj").innerHTML="<span class='error'>❌ Kayıt hatası!</span>"});
-};
-// AJANDA EXCEL AKTARIM
-document.getElementById("ajandaExcelBtn").onclick=function(){
-    let yil=document.getElementById("ajandaYil").value;
-    let ay=document.getElementById("ajandaAy").value;
-    let ayAdi=document.getElementById("ajandaAy").options[document.getElementById("ajandaAy").selectedIndex].text;
-    let excelHtml='<html><head><meta charset="UTF-8"><style>th{background:#2c3e50;color:white;padding:8px}td{padding:8px;border:1px solid black}</style></head><body>';
-    excelHtml+='<h2>SAC1 Ajanda - '+ayAdi+' '+yil+'</h2>';
-    excelHtml+='<table border="1"><tr><th>Gün</th><th>Tarih</th><th>Seri No</th><th>Açıklama / Sıra No</th></tr>';
-    document.querySelectorAll("#ajandaTablosu tbody tr").forEach(tr=>{
-        let gun=tr.cells[0]?tr.cells[0].textContent:"";
-        let tarih=tr.cells[1]?tr.cells[1].textContent:"";
-        let seri=tr.querySelector('.ajanda-seri')?tr.querySelector('.ajanda-seri').value:"";
-        let aciklama=tr.querySelector('.ajanda-aciklama')?tr.querySelector('.ajanda-aciklama').value:"";
-        excelHtml+='<tr><td>'+gun+'</td><td>'+tarih+'</td><td>'+seri+'</td><td>'+aciklama+'</td></tr>';
-    });
-    excelHtml+='</table></body></html>';
-    let blob=new Blob([excelHtml],{type:'application/vnd.ms-excel;charset=utf-8'});
-    let link=document.createElement("a");link.href=URL.createObjectURL(blob);
-    link.download="SAC1_Ajanda_"+ayAdi+"_"+yil+".xls";link.click();URL.revokeObjectURL(link.href);
-    document.getElementById("ajandaMesaj").innerHTML="<span class='success'>✅ Ajanda Excel'e aktarıldı!</span>";
-};
+function ajandaGetir(){let yil=parseInt(document.getElementById("ajandaYil").value);let ay=parseInt(document.getElementById("ajandaAy").value);let gs=new Date(yil,ay,0).getDate();let anahtar=yil+"_"+ay;let kayitli=ajandaVerileri[anahtar]||{};let h='<table><thead><tr><th>Gün</th><th>Tarih</th><th>Seri No</th><th>Açıklama / Sıra No</th></tr></thead><tbody>';for(let g=1;g<=gs;g++){let tarih=g+"/"+ay+"/"+yil;let gk="gun_"+g;let sn=kayitli[gk]?kayitli[gk].seri:"";let aciklama=kayitli[gk]?(kayitli[gk].aciklama||kayitli[gk].sira||kayitli[gk].not||""):"";h+='<tr><td>'+g+'</td><td>'+tarih+'</td>';h+='<td><input type="text" class="ajanda-not-input ajanda-seri" data-gun="'+g+'" value="'+sn+'" style="width:100px;"></td>';h+='<td><input type="text" class="ajanda-not-input ajanda-aciklama" data-gun="'+g+'" value="'+aciklama+'" style="width:100%;min-width:300px;" placeholder="Sıra numaralarını girin..."></td></tr>'}h+='</tbody></table>';document.getElementById("ajandaTablosu").innerHTML=h;document.getElementById("ajandaMesaj").innerHTML=""}
+document.getElementById("ajandaKaydetBtn").onclick=function(){let yil=parseInt(document.getElementById("ajandaYil").value);let ay=parseInt(document.getElementById("ajandaAy").value);let anahtar=yil+"_"+ay;let kayit={};document.querySelectorAll("#ajandaTablosu tbody tr").forEach(tr=>{let se=tr.querySelector('.ajanda-seri');let ae=tr.querySelector('.ajanda-aciklama');if(se&&ae){let g=se.dataset.gun;kayit["gun_"+g]={seri:se.value,aciklama:ae.value}}});ajandaVerileri[anahtar]=kayit;saveToFirebase().then(()=>{document.getElementById("ajandaMesaj").innerHTML="<span class='success'>✅ Ajanda kaydedildi! ("+ay+"/"+yil+")</span>"}).catch(()=>{document.getElementById("ajandaMesaj").innerHTML="<span class='error'>❌ Kayıt hatası!</span>"})};
+document.getElementById("ajandaExcelBtn").onclick=function(){let yil=document.getElementById("ajandaYil").value;let ay=document.getElementById("ajandaAy").value;let ayAdi=document.getElementById("ajandaAy").options[document.getElementById("ajandaAy").selectedIndex].text;let excelHtml='<html><head><meta charset="UTF-8"><style>th{background:#2c3e50;color:white;padding:8px}td{padding:8px;border:1px solid black}</style></head><body>';excelHtml+='<h2>SAC1 Ajanda - '+ayAdi+' '+yil+'</h2>';excelHtml+='<table border="1"><tr><th>Gün</th><th>Tarih</th><th>Seri No</th><th>Açıklama / Sıra No</th></tr>';document.querySelectorAll("#ajandaTablosu tbody tr").forEach(tr=>{let gun=tr.cells[0]?tr.cells[0].textContent:"";let tarih=tr.cells[1]?tr.cells[1].textContent:"";let seri=tr.querySelector('.ajanda-seri')?tr.querySelector('.ajanda-seri').value:"";let aciklama=tr.querySelector('.ajanda-aciklama')?tr.querySelector('.ajanda-aciklama').value:"";excelHtml+='<tr><td>'+gun+'</td><td>'+tarih+'</td><td>'+seri+'</td><td>'+aciklama+'</td></tr>'});excelHtml+='</table></body></html>';let blob=new Blob([excelHtml],{type:'application/vnd.ms-excel;charset=utf-8'});let link=document.createElement("a");link.href=URL.createObjectURL(blob);link.download="SAC1_Ajanda_"+ayAdi+"_"+yil+".xls";link.click();URL.revokeObjectURL(link.href);document.getElementById("ajandaMesaj").innerHTML="<span class='success'>✅ Ajanda Excel'e aktarıldı!</span>"};
 
 window.kapatModal=function(id){document.getElementById(id).style.display="none";if(id==='detayModal')detayEditingIdx=null};
 window.onclick=function(e){if(e.target.classList.contains('modal')){e.target.style.display="none";if(e.target.id==='detayModal')detayEditingIdx=null}};
 
-console.log("✅ SAC1 - Hazır! Güncel Ajanda + Özet Tablo + Tüm Stoklar");
+console.log("✅ SAC1 - Hazır! Tarih Aralıklı Özet + Excel");
 </script>
 </body>
 </html>
